@@ -1,0 +1,87 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Cart</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+<body>
+
+<nav>
+
+    <h1>🛒 Your Cart</h1>
+
+    <div>
+
+        <a href="/">Home</a>
+
+    </div>
+
+</nav>
+
+<div class="cart-container">
+
+{% for item in items %}
+
+<div class="cart-card">
+
+    <img src="{{ item.medicine.image }}" alt="">
+
+    <div class="cart-details">
+
+        <h2>{{ item.medicine.name }}</h2>
+
+        <p>{{ item.medicine.company }}</p>
+
+        <h3>₹ {{ item.medicine.price }}</h3>
+
+        <div class="quantity">
+
+            <a href="/decrease/{{ item.id }}/">−</a>
+
+            {{ item.quantity }}
+
+            <a href="/increase/{{ item.id }}/">+</a>
+
+        </div>
+
+        <a class="remove-btn"
+           href="/remove/{{ item.id }}/">
+
+           Remove
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+<div class="total-box">
+
+    Total: ₹ {{ total }}
+
+</div>
+
+<a href="/checkout/">
+
+    <button class="checkout-btn">
+
+        Proceed to Checkout
+
+    </button>
+
+</a>
+
+</div>
+
+</body>
+
+</html>

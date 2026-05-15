@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>PharmaCare</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+<body>
+
+<nav>
+
+    <h1>💊 PharmaCare</h1>
+
+    <div>
+
+        <a href="/">Home</a>
+
+        <a href="/cart/">Cart</a>
+
+    </div>
+
+</nav>
+
+<section class="hero">
+
+    <h2>Your Trusted Online Pharmacy</h2>
+
+    <p>Medicines delivered safely to your doorstep.</p>
+
+</section>
+
+<section class="categories">
+
+    <h2>Categories</h2>
+
+    <div class="category-container">
+
+        <a href="/">
+
+            <div class="category-card">
+
+                All Products
+
+            </div>
+
+        </a>
+
+        {% for category in categories %}
+
+        <a href="/?category={{ category.id }}">
+
+            <div class="category-card">
+
+                {{ category.name }}
+
+            </div>
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+<section class="medicines">
+
+    <h2>Medicines</h2>
+
+    <div class="medicine-container">
+
+        {% for medicine in medicines %}
+
+        <div class="medicine-card">
+
+            <img src="{{ medicine.image }}" alt="">
+
+            <h3>{{ medicine.name }}</h3>
+
+            <p>{{ medicine.company }}</p>
+
+            <h4>₹ {{ medicine.price }}</h4>
+
+            <a href="/add-to-cart/{{ medicine.id }}/">
+
+                <button>Add to Cart</button>
+
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+</body>
+
+</html>
