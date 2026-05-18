@@ -1,40 +1,20 @@
-{% load static %}
+{% extends 'base.html' %}
+{% block title %}Checkout - PharmaCare{% endblock %}
 
-<!DOCTYPE html>
-<html>
-
-<head>
-
-    <title>Checkout</title>
-
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-</head>
-
-<body>
-
+{% block content %}
 <div class="checkout-container">
-
     <h1>Checkout</h1>
-
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        {% for item in items %}
+            <p>{{ item.medicine.name }} x {{ item.quantity }}: ₹ {{ item.subtotal }}</p>
+        {% endfor %}
+        <h3>Total: ₹ {{ total }}</h3>
+    </div>
     <form method="POST">
-
         {% csrf_token %}
-
         {{ form.as_p }}
-
-        <h2>Total: ₹ {{ total }}</h2>
-
-        <button type="submit">
-
-            Place Order
-
-        </button>
-
+        <button type="submit">Place Order</button>
     </form>
-
 </div>
-
-</body>
-
-</html>
+{% endblock %}
