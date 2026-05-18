@@ -43,13 +43,21 @@
 
         <div class="quantity">
 
-            <a href="/decrease/{{ item.id }}/">−</a>
+            <a href="/decrease/{{ item.id }}/">
 
-            {{ item.quantity }}
+                <button>-</button>
 
-            <a href="/increase/{{ item.id }}/">+</a>
+            </a>
 
-        </div>
+            <span>{{ item.quantity }}</span>
+
+            <a href="/increase/{{ item.id }}/">
+
+                 <button>+</button>
+
+            </a>
+
+</div>
 
         <a class="remove-btn"
            href="/remove/{{ item.id }}/">

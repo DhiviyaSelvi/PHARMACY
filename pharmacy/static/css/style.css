@@ -194,3 +194,41 @@ nav a{
     border-radius:10px;
     font-size:18px;
 }
+.quantity{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+}
+
+.quantity button{
+    width:35px;
+    height:35px;
+    border:none;
+    border-radius:8px;
+    background:#009688;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.remove-btn{
+    display:inline-block;
+    margin-top:15px;
+    background:red;
+    color:white;
+    padding:10px 15px;
+    border-radius:8px;
+    text-decoration:none;
+}
+
+.checkout-btn{
+    padding:15px 30px;
+    background:#009688;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+    margin-top:20px;
+}
