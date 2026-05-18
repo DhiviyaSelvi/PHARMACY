@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib import messages
 
 from .models import *
 from .forms import CheckoutForm
@@ -32,29 +34,34 @@ def home(request):
 
 @login_required(login_url='/login/')
 def add_to_cart(request, medicine_id):
-
     medicine = get_object_or_404(Medicine, id=medicine_id)
 
     if medicine.stock <= 0:
-        return redirect('/')
+        messages.warning(request, f"Sorry, {medicine.name} is out of stock.")
+        return redirect('home')
 
-    cart, created = Cart.objects.get_or_create(
-        user=request.user
-    )
-
-    cart_item, created = CartItem.objects.get_or_create(
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_item, item_created = CartItem.objects.get_or_create(
         cart=cart,
         medicine=medicine
     )
 
-    if not created:
-
+    if not item_created:
         if cart_item.quantity < medicine.stock:
-
             cart_item.quantity += 1
             cart_item.save()
+            messages.success(request, f"Added another {medicine.name} to your cart.")
+        else:
+            messages.warning(request, f"Sorry, only {medicine.stock} items in stock.")
+    else:
+        # Check stock for newly created cart item too
+        if cart_item.quantity > medicine.stock:
+            cart_item.delete()
+            messages.warning(request, f"Sorry, {medicine.name} is out of stock.")
+            return redirect('home')
+        messages.success(request, f"{medicine.name} added to cart.")
 
-    return redirect('/cart/')
+    return redirect('cart')
 
 
 @login_required(login_url='/login/')
@@ -109,63 +116,40 @@ def decrease_quantity(request, item_id):
 
 @login_required(login_url='/login/')
 def remove_from_cart(request, item_id):
-
-    item = CartItem.objects.get(id=item_id)
-
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    medicine_name = item.medicine.name
     item.delete()
-
-    return redirect('/cart/')
+    messages.info(request, f"Removed {medicine_name} from cart.")
+    return redirect('cart')
 
 
 def signup_view(request):
-
     if request.method == 'POST':
-
-        username = request.POST['username']
-        password = request.POST['password']
-
-        if User.objects.filter(username=username).exists():
-
-            return render(request, 'signup.html', {
-                'error': 'Username already exists'
-            })
-
-        user = User.objects.create_user(
-            username=username,
-            password=password
-        )
-
-        login(request, user)
-
-        return redirect('/')
-
-    return render(request, 'signup.html')
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Account created successfully!")
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
 
 
 def login_view(request):
-
     if request.method == 'POST':
-
-        username = request.POST['username']
-        password = request.POST['password']
-
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
-
-        if user:
-
-            login(request, user)
-
-            return redirect('/')
-
-        return render(request, 'login.html', {
-            'error': 'Invalid credentials'
-        })
-
-    return render(request, 'login.html')
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Welcome back, {username}!")
+                return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
 
 
 def logout_view(request):
@@ -192,30 +176,38 @@ def checkout(request):
         form = CheckoutForm(request.POST)
 
         if form.is_valid():
+            from django.db import transaction
+            from django.db.models import F
 
-            order = form.save(commit=False)
+            try:
+                with transaction.atomic():
+                    order = form.save(commit=False)
+                    order.user = request.user
+                    order.total_amount = total
+                    order.save()
 
-            order.user = request.user
+                    for item in items:
+                        # Re-check stock atomically
+                        medicine = Medicine.objects.select_for_update().get(id=item.medicine.id)
+                        if medicine.stock < item.quantity:
+                            raise ValueError(f"Not enough stock for {medicine.name}")
 
-            order.total_amount = total
+                        OrderItem.objects.create(
+                            order=order,
+                            medicine=medicine,
+                            quantity=item.quantity,
+                            price=medicine.price
+                        )
 
-            order.save()
+                        medicine.stock = F('stock') - item.quantity
+                        medicine.save()
 
-            for item in items:
-
-                OrderItem.objects.create(
-                    order=order,
-                    medicine=item.medicine,
-                    quantity=item.quantity,
-                    price=item.medicine.price
-                )
-
-                item.medicine.stock -= item.quantity
-                item.medicine.save()
-
-            items.delete()
-
-            return render(request, 'order_success.html')
+                    items.delete()
+                    messages.success(request, "Order placed successfully!")
+                    return render(request, 'order_success.html')
+            except ValueError as e:
+                messages.error(request, str(e))
+                return redirect('cart')
 
     else:
 
