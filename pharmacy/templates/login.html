@@ -1,54 +1,15 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block title %}Login - PharmaCare{% endblock %}
 
-<head>
-
-    <title>Login</title>
-
-</head>
-
-<body>
-
+{% block content %}
+<div class="auth-container">
     <h1>Login</h1>
-
     <form method="POST">
-
         {% csrf_token %}
-
-        <input
-            type="text"
-            name="username"
-            placeholder="Username"
-        >
-
-        <br><br>
-
-        <input
-            type="password"
-            name="password"
-            placeholder="Password"
-        >
-
-        <br><br>
-
-        <button type="submit">
-
-            Login
-
-        </button>
-
+        {{ form.as_p }}
+        <button type="submit">Login</button>
     </form>
-
     <br>
-
-    <a href="/signup/">
-
-        Create Account
-
-    </a>
-
-    <p>{{ error }}</p>
-
-</body>
-
-</html>
+    <a href="{% url 'signup' %}">Create Account</a>
+</div>
+{% endblock %}
