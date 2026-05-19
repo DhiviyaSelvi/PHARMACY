@@ -14,5 +14,6 @@ class CheckoutForm(forms.ModelForm):
             'phone',
             'address',
             'city',
-            'pincode'
+            'pincode',
+            'payment_method'
         ]

@@ -1,11 +1,31 @@
 name,company,category,price,stock,image
-Dolo 650,Micro Labs,TABLETS,35,120,https://i.imgur.com/W1bVY6F.png
-Crocin,GSK,TABLETS,40,90,https://i.imgur.com/W1bVY6F.png
-Azithromycin,Cipla,ANTIBIOTICS,120,50,https://i.imgur.com/W1bVY6F.png
-Vitamin C,Zydus,VITAMINS,80,75,https://i.imgur.com/W1bVY6F.png
-Benadryl,Johnson,SYRUPS,95,40,https://i.imgur.com/W1bVY6F.png
-Insulin,Novo Nordisk,DIABETES,450,20,https://i.imgur.com/W1bVY6F.png
-Paracetamol,Sun Pharma,PAIN RELIEF,30,150,https://i.imgur.com/W1bVY6F.png
-Amoxicillin,Dr Reddy's,ANTIBIOTICS,150,45,https://i.imgur.com/W1bVY6F.png
-Shelcal,Torrent,VITAMINS,110,60,https://i.imgur.com/W1bVY6F.png
-Cofsils,Cipla,SYRUPS,65,80,https://i.imgur.com/W1bVY6F.png
+Dolo 650,Micro Labs,TABLETS,35.00,120,https://i.imgur.com/W1bVY6F.png
+Crocin 500,GSK,TABLETS,40.00,90,https://i.imgur.com/W1bVY6F.png
+Azithral 500,Alembic,ANTIBIOTICS,120.00,50,https://i.imgur.com/W1bVY6F.png
+Limcee,Abbott,VITAMINS,80.00,75,https://i.imgur.com/W1bVY6F.png
+Benadryl DR,Johnson & Johnson,SYRUPS,125.00,40,https://i.imgur.com/W1bVY6F.png
+Mixtard 30/70,Novo Nordisk,DIABETES,450.00,20,https://i.imgur.com/W1bVY6F.png
+Combiflam,Sanofi,PAIN RELIEF,45.00,150,https://i.imgur.com/W1bVY6F.png
+Augmentin 625 Duo,GSK,ANTIBIOTICS,220.00,45,https://i.imgur.com/W1bVY6F.png
+Shelcal 500,Torrent Pharma,VITAMINS,130.00,60,https://i.imgur.com/W1bVY6F.png
+Ascoril LS,Glenmark,SYRUPS,115.00,80,https://i.imgur.com/W1bVY6F.png
+Glycomet GP 1,Franco-Indian,DIABETES,95.00,100,https://i.imgur.com/W1bVY6F.png
+Telma 40,Glenmark,HEART,185.00,70,https://i.imgur.com/W1bVY6F.png
+Pan 40,Alkem,ACIDITY,165.00,110,https://i.imgur.com/W1bVY6F.png
+Liv 52,Himalaya,LIVER CARE,140.00,55,https://i.imgur.com/W1bVY6F.png
+Amlokind 5,Mankind Pharma,HEART,35.00,130,https://i.imgur.com/W1bVY6F.png
+Digene Gel,Abbott,ACIDITY,145.00,40,https://i.imgur.com/W1bVY6F.png
+Zifi 200,FDC Ltd,ANTIBIOTICS,110.00,65,https://i.imgur.com/W1bVY6F.png
+Becosules Z,Pfizer,VITAMINS,50.00,200,https://i.imgur.com/W1bVY6F.png
+Vicks Vaporub,P&G,COLD & COUGH,90.00,100,https://i.imgur.com/W1bVY6F.png
+Omee,Alkem,ACIDITY,60.00,150,https://i.imgur.com/W1bVY6F.png
+Atorva 10,Zydus Cadila,HEART,210.00,80,https://i.imgur.com/W1bVY6F.png
+Calpol 650,GSK,TABLETS,35.00,140,https://i.imgur.com/W1bVY6F.png
+Montek LC,Cipla,ALLERGY,215.00,75,https://i.imgur.com/W1bVY6F.png
+Allegra 120,Sanofi,ALLERGY,195.00,90,https://i.imgur.com/W1bVY6F.png
+Duphalac,Abbott,DIGESTION,280.00,30,https://i.imgur.com/W1bVY6F.png
+Metrogyl 400,J.B. Chemicals,ANTIBIOTICS,25.00,180,https://i.imgur.com/W1bVY6F.png
+Okacet,Cipla,ALLERGY,40.00,120,https://i.imgur.com/W1bVY6F.png
+Neurobion Forte,P&G,VITAMINS,35.00,300,https://i.imgur.com/W1bVY6F.png
+Cremaffin,Abbott,DIGESTION,225.00,45,https://i.imgur.com/W1bVY6F.png
+Septilin,Himalaya,IMMUNITY,160.00,60,https://i.imgur.com/W1bVY6F.png
