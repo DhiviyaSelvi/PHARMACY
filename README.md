@@ -36,3 +36,11 @@ An online pharmacy management and e-commerce platform developed with Django and 
 
 - **System Check:** Run `python manage.py check` to ensure the configuration is correct.
 - **Production Check:** Run `python manage.py check --deploy` to see production-level security recommendations.
+
+## Features
+- **Medicine Catalog:** Extensive list of Indian medicines categorized by use.
+- **Shopping Cart:** Add, remove, and update medicine quantities.
+- **Authentication:** Secure login and signup for customers.
+- **Checkout:** Complete checkout process with shipping details and multiple payment options (Cash, GPay, PhonePe, Card).
+- **Atomic Inventory:** Real-time stock management with database transactions.
+- **Production Ready:** Environment variable management, security headers, and optimized static file serving.

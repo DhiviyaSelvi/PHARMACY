@@ -66,25 +66,36 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+    PAYMENT_METHODS = [
+        ('CASH', 'Cash on Delivery'),
+        ('GPAY', 'Google Pay'),
+        ('PHONEPE', 'PhonePe'),
+        ('CARD', 'Credit/Debit Card'),
+    ]
+
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     full_name = models.CharField(max_length=200)
-
     phone = models.CharField(max_length=20)
-
     address = models.TextField()
-
     city = models.CharField(max_length=100)
-
     pincode = models.CharField(max_length=10)
-
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+    payment_method = models.CharField(
+        max_length=20, choices=PAYMENT_METHODS, default='CASH'
+    )
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='PENDING'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.full_name
+        return f"Order {self.id} - {self.full_name}"
 
 
 class OrderItem(models.Model):

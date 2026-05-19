@@ -2,19 +2,68 @@
 {% block title %}Checkout - PharmaCare{% endblock %}
 
 {% block content %}
-<div class="checkout-container">
-    <h1>Checkout</h1>
-    <div class="order-summary">
-        <h2>Order Summary</h2>
-        {% for item in items %}
-            <p>{{ item.medicine.name }} x {{ item.quantity }}: ₹ {{ item.subtotal }}</p>
-        {% endfor %}
-        <h3>Total: ₹ {{ total }}</h3>
+<div class="checkout-container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <h1 style="text-align: center; margin-bottom: 2rem;">Checkout</h1>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="order-summary" style="background: #f9f9f9; padding: 1.5rem; border-radius: 8px;">
+            <h2 style="border-bottom: 2px solid #0056b3; padding-bottom: 0.5rem; margin-top: 0;">Order Summary</h2>
+            <div style="margin: 1rem 0;">
+                {% for item in items %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>{{ item.medicine.name }} x {{ item.quantity }}</span>
+                        <span>₹ {{ item.subtotal }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <hr>
+            <h3 style="display: flex; justify-content: space-between; color: #0056b3;">
+                <span>Total:</span>
+                <span>₹ {{ total }}</span>
+            </h3>
+        </div>
+
+        <div class="checkout-form">
+            <form method="POST">
+                {% csrf_token %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-top: 0;">Shipping Information</h3>
+                    {{ form.full_name.label_tag }} {{ form.full_name }}
+                    {{ form.phone.label_tag }} {{ form.phone }}
+                    {{ form.address.label_tag }} {{ form.address }}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>{{ form.city.label_tag }} {{ form.city }}</div>
+                        <div>{{ form.pincode.label_tag }} {{ form.pincode }}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <h3>Payment Method</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Select your preferred payment method:</p>
+                    {{ form.payment_method }}
+                </div>
+
+                <button type="submit" style="width: 100%; padding: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; font-weight: bold;">
+                    Place Order (₹ {{ total }})
+                </button>
+            </form>
+        </div>
     </div>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Place Order</button>
-    </form>
 </div>
+
+<style>
+    .checkout-form input, .checkout-form textarea, .checkout-form select {
+        width: 100%;
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .checkout-form label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+</style>
 {% endblock %}
