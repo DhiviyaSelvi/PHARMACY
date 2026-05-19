@@ -140,3 +140,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Razorpay Settings
+RAZOR_KEY_ID = config('RAZOR_KEY_ID', default='')
+RAZOR_KEY_SECRET = config('RAZOR_KEY_SECRET', default='')

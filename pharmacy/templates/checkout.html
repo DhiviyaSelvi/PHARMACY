@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Checkout - PharmaCare{% endblock %}
 
+{% block extra_css %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="checkout-page-container" style="max-width: 1000px; margin: 3rem auto; padding: 0 1rem;">
     <h1 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: #1e293b;">Complete Your Order</h1>
@@ -77,7 +81,13 @@
                     {{ form.payment_method }}
                 </div>
 
-                <button type="submit" class="place-order-btn" style="width: 100%; padding: 1.25rem; background: #10b981; color: white; border: none; border-radius: 0.75rem; font-size: 1.25rem; font-weight: 700; cursor: pointer; margin-top: 2rem; transition: background 0.2s;">
+                <div id="transaction-id-group" class="form-group" style="display: none;">
+                    {{ form.transaction_id.label_tag }}
+                    {{ form.transaction_id }}
+                    <small style="color: #64748b; display: block; margin-top: 0.25rem;">Enter the Transaction ID/Reference Number from your payment app.</small>
+                </div>
+
+                <button type="submit" id="submit-btn" class="place-order-btn" style="width: 100%; padding: 1.25rem; background: #10b981; color: white; border: none; border-radius: 0.75rem; font-size: 1.25rem; font-weight: 700; cursor: pointer; margin-top: 2rem; transition: background 0.2s;">
                     Confirm & Place Order
                 </button>
             </form>
@@ -115,32 +125,74 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        {% if razorpay_order_id %}
+        var options = {
+            "key": "{{ razorpay_merchant_key }}",
+            "amount": "{{ razorpay_amount }}",
+            "currency": "INR",
+            "name": "PharmaCare",
+            "description": "Medicine Purchase",
+            "order_id": "{{ razorpay_order_id }}",
+            "callback_url": "{{ callback_url }}",
+            "prefill": {
+                "name": "{{ user.get_full_name }}",
+                "email": "{{ user.email }}",
+            },
+            "theme": {
+                "color": "#2563eb"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        {% endif %}
+
         const paymentSelect = document.querySelector('select[name="payment_method"]');
         const paymentDetails = document.getElementById('payment-details');
         const paymentTitle = document.getElementById('payment-title');
+        const transactionGroup = document.getElementById('transaction-id-group');
+        const transactionInput = document.querySelector('input[name="transaction_id"]');
+        const form = document.querySelector('.styled-form');
 
         function updatePaymentUI() {
             const val = paymentSelect.value;
-            if (val === 'GPAY' || val === 'PHONEPE') {
-                paymentDetails.style.display = 'block';
-                paymentTitle.textContent = val === 'GPAY' ? 'Pay with Google Pay' : 'Pay with PhonePe';
+            if (val === 'GPAY' || val === 'PHONEPE' || val === 'CARD' || val === 'RAZORPAY') {
+                paymentDetails.style.display = (val === 'RAZORPAY') ? 'none' : 'block';
+                transactionGroup.style.display = (val === 'RAZORPAY') ? 'none' : 'block';
+                transactionInput.required = (val !== 'CASH' && val !== 'RAZORPAY');
 
-                // Optional: Update QR code data if needed
-                const qrImg = document.getElementById('qr-code');
-                const upiData = `upi://pay?pa=pharmacy@okaxis&pn=PharmaCare&am={{ total }}&cu=INR`;
-                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiData)}`;
-            } else if (val === 'CARD') {
-                paymentDetails.style.display = 'block';
-                paymentTitle.textContent = 'Credit/Debit Card Payment';
-                document.getElementById('qr-code').style.display = 'none';
-                document.querySelector('#payment-details p').innerHTML = 'Please follow the redirect after clicking confirm to complete card payment.';
+                if (val === 'RAZORPAY') {
+                    // Razorpay handled via modal
+                } else if (val === 'CARD') {
+                    paymentTitle.textContent = 'Credit/Debit Card Payment';
+                    document.getElementById('qr-code').style.display = 'none';
+                    document.querySelector('#payment-details p').innerHTML = 'Please enter your Transaction ID after completing the card payment via our gateway.';
+                } else {
+                    paymentTitle.textContent = val === 'GPAY' ? 'Pay with Google Pay' : 'Pay with PhonePe';
+                    document.getElementById('qr-code').style.display = 'block';
+                    const qrImg = document.getElementById('qr-code');
+                    const upiData = `upi://pay?pa=pharmacy@okaxis&pn=PharmaCare&am={{ total }}&cu=INR`;
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiData)}`;
+                    document.querySelector('#payment-details p').innerHTML = 'After payment, enter the Transaction ID and click "Confirm" below.';
+                }
             } else {
                 paymentDetails.style.display = 'none';
+                transactionGroup.style.display = 'none';
+                transactionInput.required = false;
+                transactionInput.value = '';
             }
         }
 
         paymentSelect.addEventListener('change', updatePaymentUI);
         updatePaymentUI(); // Initial check
+
+        form.addEventListener('submit', function(e) {
+            const val = paymentSelect.value;
+            if (val !== 'CASH' && val !== 'RAZORPAY' && !transactionInput.value.trim()) {
+                e.preventDefault();
+                alert('Please enter the Transaction ID for online payment.');
+                transactionInput.focus();
+            }
+        });
     });
 </script>
 {% endblock %}
