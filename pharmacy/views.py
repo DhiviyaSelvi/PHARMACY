@@ -162,14 +162,14 @@ def logout_view(request):
 @login_required(login_url='/login/')
 def checkout(request):
 
-    cart = Cart.objects.get(user=request.user)
-
+    cart, _ = Cart.objects.get_or_create(user=request.user)
     items = CartItem.objects.filter(cart=cart)
 
-    total = 0
+    if not items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('home')
 
-    for item in items:
-        total += item.subtotal()
+    total = sum(item.subtotal() for item in items)
 
     if request.method == 'POST':
 
@@ -184,6 +184,13 @@ def checkout(request):
                     order = form.save(commit=False)
                     order.user = request.user
                     order.total_amount = total
+
+                    # Set status based on payment method
+                    if order.payment_method == 'CASH':
+                        order.status = 'PROCESSING'
+                    else:
+                        order.status = 'PENDING'
+
                     order.save()
 
                     for item in items:

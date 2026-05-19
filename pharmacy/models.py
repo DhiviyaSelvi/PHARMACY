@@ -75,6 +75,7 @@ class Order(models.Model):
 
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
+        ('PROCESSING', 'Processing'),
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
     ]
@@ -85,6 +86,7 @@ class Order(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=100)
     pincode = models.CharField(max_length=10)
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(
         max_length=20, choices=PAYMENT_METHODS, default='CASH'
