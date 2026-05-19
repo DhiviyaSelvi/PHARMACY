@@ -17,12 +17,17 @@ An online pharmacy management and e-commerce platform developed with Django and 
    python manage.py migrate
    ```
 
-4. **Collect Static Files:**
+4. **Import Initial Data:**
+   ```bash
+   python import_medicines.py
+   ```
+
+5. **Collect Static Files:**
    ```bash
    python manage.py collectstatic
    ```
 
-5. **Run the Development Server:**
+6. **Run the Development Server:**
    ```bash
    python manage.py runserver
    ```
