@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Checkout - PharmaCare{% endblock %}
 
+{% block extra_css %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="checkout-page-container" style="max-width: 1000px; margin: 3rem auto; padding: 0 1rem;">
     <h1 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: #1e293b;">Complete Your Order</h1>
@@ -121,6 +125,27 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        {% if razorpay_order_id %}
+        var options = {
+            "key": "{{ razorpay_merchant_key }}",
+            "amount": "{{ razorpay_amount }}",
+            "currency": "INR",
+            "name": "PharmaCare",
+            "description": "Medicine Purchase",
+            "order_id": "{{ razorpay_order_id }}",
+            "callback_url": "{{ callback_url }}",
+            "prefill": {
+                "name": "{{ user.get_full_name }}",
+                "email": "{{ user.email }}",
+            },
+            "theme": {
+                "color": "#2563eb"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        {% endif %}
+
         const paymentSelect = document.querySelector('select[name="payment_method"]');
         const paymentDetails = document.getElementById('payment-details');
         const paymentTitle = document.getElementById('payment-title');
@@ -130,12 +155,14 @@
 
         function updatePaymentUI() {
             const val = paymentSelect.value;
-            if (val === 'GPAY' || val === 'PHONEPE' || val === 'CARD') {
-                paymentDetails.style.display = 'block';
-                transactionGroup.style.display = 'block';
-                transactionInput.required = true;
+            if (val === 'GPAY' || val === 'PHONEPE' || val === 'CARD' || val === 'RAZORPAY') {
+                paymentDetails.style.display = (val === 'RAZORPAY') ? 'none' : 'block';
+                transactionGroup.style.display = (val === 'RAZORPAY') ? 'none' : 'block';
+                transactionInput.required = (val !== 'CASH' && val !== 'RAZORPAY');
 
-                if (val === 'CARD') {
+                if (val === 'RAZORPAY') {
+                    // Razorpay handled via modal
+                } else if (val === 'CARD') {
                     paymentTitle.textContent = 'Credit/Debit Card Payment';
                     document.getElementById('qr-code').style.display = 'none';
                     document.querySelector('#payment-details p').innerHTML = 'Please enter your Transaction ID after completing the card payment via our gateway.';
@@ -160,7 +187,7 @@
 
         form.addEventListener('submit', function(e) {
             const val = paymentSelect.value;
-            if (val !== 'CASH' && !transactionInput.value.trim()) {
+            if (val !== 'CASH' && val !== 'RAZORPAY' && !transactionInput.value.trim()) {
                 e.preventDefault();
                 alert('Please enter the Transaction ID for online payment.');
                 transactionInput.focus();

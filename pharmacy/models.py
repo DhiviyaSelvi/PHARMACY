@@ -71,6 +71,7 @@ class Order(models.Model):
         ('GPAY', 'Google Pay'),
         ('PHONEPE', 'PhonePe'),
         ('CARD', 'Credit/Debit Card'),
+        ('RAZORPAY', 'Razorpay'),
     ]
 
     STATUS_CHOICES = [
@@ -87,6 +88,9 @@ class Order(models.Model):
     city = models.CharField(max_length=100)
     pincode = models.CharField(max_length=10)
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=200, blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(
         max_length=20, choices=PAYMENT_METHODS, default='CASH'

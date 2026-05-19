@@ -84,6 +84,47 @@ def cart_view(request):
     })
 
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def payment_callback(request):
+    if request.method == "POST":
+        try:
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            razorpay_order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+
+            client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+
+            # Verify the signature
+            client.utility.verify_payment_signature(params_dict)
+
+            # Update order
+            order = Order.objects.get(razorpay_order_id=razorpay_order_id)
+            order.razorpay_payment_id = payment_id
+            order.razorpay_signature = signature
+            order.status = 'COMPLETED'
+            order.save()
+
+            # Clear cart
+            cart = Cart.objects.get(user=order.user)
+            CartItem.objects.filter(cart=cart).delete()
+
+            messages.success(request, "Payment successful! Your order has been placed.")
+            return render(request, 'order_success.html')
+
+        except Exception as e:
+            messages.error(request, f"Payment verification failed: {str(e)}")
+            return redirect('cart')
+    return redirect('home')
+
+
 @login_required(login_url='/login/')
 def increase_quantity(request, item_id):
 
@@ -159,6 +200,10 @@ def logout_view(request):
     return redirect('/login/')
 
 
+import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
 @login_required(login_url='/login/')
 def checkout(request):
 
@@ -208,6 +253,27 @@ def checkout(request):
 
                         medicine.stock = F('stock') - item.quantity
                         medicine.save()
+
+                    if order.payment_method == 'RAZORPAY':
+                        client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+                        payment = client.order.create({
+                            'amount': int(total * 100),  # Amount in paise
+                            'currency': 'INR',
+                            'payment_capture': '1'
+                        })
+                        order.razorpay_order_id = payment['id']
+                        order.save()
+
+                        return render(request, 'checkout.html', {
+                            'form': form,
+                            'items': items,
+                            'total': total,
+                            'razorpay_order_id': payment['id'],
+                            'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+                            'razorpay_amount': payment['amount'],
+                            'order_id': order.id,
+                            'callback_url': request.build_absolute_uri('/payment/callback/')
+                        })
 
                     items.delete()
                     messages.success(request, "Order placed successfully!")
