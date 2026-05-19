@@ -2,49 +2,83 @@
 {% block title %}Checkout - PharmaCare{% endblock %}
 
 {% block content %}
-<div class="checkout-container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
-    <h1 style="text-align: center; margin-bottom: 2rem;">Checkout</h1>
+<div class="checkout-page-container" style="max-width: 1000px; margin: 3rem auto; padding: 0 1rem;">
+    <h1 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: #1e293b;">Complete Your Order</h1>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div class="order-summary" style="background: #f9f9f9; padding: 1.5rem; border-radius: 8px;">
-            <h2 style="border-bottom: 2px solid #0056b3; padding-bottom: 0.5rem; margin-top: 0;">Order Summary</h2>
-            <div style="margin: 1rem 0;">
-                {% for item in items %}
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span>{{ item.medicine.name }} x {{ item.quantity }}</span>
-                        <span>₹ {{ item.subtotal }}</span>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+        <!-- Left Column: Summary & Payment Info -->
+        <div class="checkout-info">
+            <div class="order-summary" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow); margin-bottom: 2rem;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #334155; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem;">Order Summary</h2>
+                <div style="margin: 1rem 0;">
+                    {% for item in items %}
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 1.1rem;">
+                            <span style="color: #64748b;">{{ item.medicine.name }} x {{ item.quantity }}</span>
+                            <span style="font-weight: 600;">₹ {{ item.subtotal }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #f1f5f9;">
+                    <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 800; color: #2563eb;">
+                        <span>Total Payable:</span>
+                        <span>₹ {{ total }}</span>
                     </div>
-                {% endfor %}
+                </div>
             </div>
-            <hr>
-            <h3 style="display: flex; justify-content: space-between; color: #0056b3;">
-                <span>Total:</span>
-                <span>₹ {{ total }}</span>
-            </h3>
+
+            <!-- Dynamic Payment Details Section -->
+            <div id="payment-details" style="background: #eff6ff; padding: 2rem; border-radius: 1rem; border: 2px dashed #3b82f6; display: none;">
+                <h3 id="payment-title" style="color: #1e40af; margin-bottom: 1rem;">Scan to Pay</h3>
+                <div style="text-align: center; background: white; padding: 1rem; border-radius: 0.5rem; display: inline-block; margin-bottom: 1rem;">
+                    <!-- Placeholder QR Code using an API -->
+                    <img id="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=pharmacy@okaxis%26pn=PharmaCare%26am={{ total }}%26cu=INR" alt="QR Code" style="width: 200px; height: 200px;">
+                </div>
+                <div style="margin-top: 1rem;">
+                    <p style="font-weight: 600; color: #1e40af;">UPI ID: <span style="color: #2563eb;">pharmacy@okaxis</span></p>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem;">After payment, click "Place Order" below to confirm.</p>
+                </div>
+            </div>
         </div>
 
-        <div class="checkout-form">
-            <form method="POST">
+        <!-- Right Column: Shipping Form -->
+        <div class="checkout-form-container">
+            <form method="POST" class="styled-form" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow);">
                 {% csrf_token %}
-                <div style="margin-bottom: 1.5rem;">
-                    <h3 style="margin-top: 0;">Shipping Information</h3>
-                    {{ form.full_name.label_tag }} {{ form.full_name }}
-                    {{ form.phone.label_tag }} {{ form.phone }}
-                    {{ form.address.label_tag }} {{ form.address }}
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div>{{ form.city.label_tag }} {{ form.city }}</div>
-                        <div>{{ form.pincode.label_tag }} {{ form.pincode }}</div>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #334155;">Shipping Details</h2>
+
+                <div class="form-group">
+                    {{ form.full_name.label_tag }}
+                    {{ form.full_name }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.phone.label_tag }}
+                    {{ form.phone }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.address.label_tag }}
+                    {{ form.address }}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        {{ form.city.label_tag }}
+                        {{ form.city }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.pincode.label_tag }}
+                        {{ form.pincode }}
                     </div>
                 </div>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <h3>Payment Method</h3>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Select your preferred payment method:</p>
+                <div class="form-group">
+                    <h2 style="font-size: 1.5rem; margin-top: 1rem; margin-bottom: 1rem; color: #334155;">Payment Method</h2>
                     {{ form.payment_method }}
                 </div>
 
-                <button type="submit" style="width: 100%; padding: 1rem; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; font-weight: bold;">
-                    Place Order (₹ {{ total }})
+                <button type="submit" class="place-order-btn" style="width: 100%; padding: 1.25rem; background: #10b981; color: white; border: none; border-radius: 0.75rem; font-size: 1.25rem; font-weight: 700; cursor: pointer; margin-top: 2rem; transition: background 0.2s;">
+                    Confirm & Place Order
                 </button>
             </form>
         </div>
@@ -52,18 +86,61 @@
 </div>
 
 <style>
-    .checkout-form input, .checkout-form textarea, .checkout-form select {
-        width: 100%;
-        padding: 0.8rem;
-        margin-bottom: 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
+    .form-group {
+        margin-bottom: 1.25rem;
     }
-    .checkout-form label {
+    .styled-form label {
         display: block;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.5rem;
         font-weight: 600;
+        color: #475569;
+    }
+    .styled-form input, .styled-form textarea, .styled-form select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    .styled-form input:focus, .styled-form select:focus {
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .place-order-btn:hover {
+        background: #059669 !important;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentSelect = document.querySelector('select[name="payment_method"]');
+        const paymentDetails = document.getElementById('payment-details');
+        const paymentTitle = document.getElementById('payment-title');
+
+        function updatePaymentUI() {
+            const val = paymentSelect.value;
+            if (val === 'GPAY' || val === 'PHONEPE') {
+                paymentDetails.style.display = 'block';
+                paymentTitle.textContent = val === 'GPAY' ? 'Pay with Google Pay' : 'Pay with PhonePe';
+
+                // Optional: Update QR code data if needed
+                const qrImg = document.getElementById('qr-code');
+                const upiData = `upi://pay?pa=pharmacy@okaxis&pn=PharmaCare&am={{ total }}&cu=INR`;
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiData)}`;
+            } else if (val === 'CARD') {
+                paymentDetails.style.display = 'block';
+                paymentTitle.textContent = 'Credit/Debit Card Payment';
+                document.getElementById('qr-code').style.display = 'none';
+                document.querySelector('#payment-details p').innerHTML = 'Please follow the redirect after clicking confirm to complete card payment.';
+            } else {
+                paymentDetails.style.display = 'none';
+            }
+        }
+
+        paymentSelect.addEventListener('change', updatePaymentUI);
+        updatePaymentUI(); // Initial check
+    });
+</script>
 {% endblock %}
