@@ -9,3 +9,5 @@ sqlparse==0.5.5
 typing_extensions==4.15.0
 whitenoise==6.12.0
 razorpay
+Pillow
+gunicorn

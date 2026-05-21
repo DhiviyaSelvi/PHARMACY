@@ -1,4 +1,7 @@
+import razorpay
 from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -15,16 +18,19 @@ def home(request):
     categories = Category.objects.all()
 
     category_id = request.GET.get('category')
+    query = request.GET.get('q')
+
+    medicines = Medicine.objects.all()
 
     if category_id:
+        medicines = medicines.filter(category_id=category_id)
 
-        medicines = Medicine.objects.filter(
-            category_id=category_id
+    if query:
+        medicines = medicines.filter(
+            models.Q(name__icontains=query) |
+            models.Q(company__icontains=query) |
+            models.Q(description__icontains=query)
         )
-
-    else:
-
-        medicines = Medicine.objects.all()
 
     return render(request, 'home.html', {
         'medicines': medicines,
@@ -83,8 +89,6 @@ def cart_view(request):
         'total': total
     })
 
-
-from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def payment_callback(request):
@@ -156,6 +160,19 @@ def decrease_quantity(request, item_id):
 
 
 @login_required(login_url='/login/')
+def order_list(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'order_list.html', {'orders': orders})
+
+
+@login_required(login_url='/login/')
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    items = OrderItem.objects.filter(order=order)
+    return render(request, 'order_detail.html', {'order': order, 'items': items})
+
+
+@login_required(login_url='/login/')
 def remove_from_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     medicine_name = item.medicine.name
@@ -200,9 +217,13 @@ def logout_view(request):
     return redirect('/login/')
 
 
-import razorpay
-from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
+def about_view(request):
+    return render(request, 'about.html')
+
+
+def contact_view(request):
+    return render(request, 'contact.html')
+
 
 @login_required(login_url='/login/')
 def checkout(request):
@@ -218,7 +239,7 @@ def checkout(request):
 
     if request.method == 'POST':
 
-        form = CheckoutForm(request.POST)
+        form = CheckoutForm(request.POST, request.FILES)
 
         if form.is_valid():
             from django.db import transaction
