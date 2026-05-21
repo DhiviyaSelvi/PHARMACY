@@ -9,9 +9,27 @@ sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pharmacy_project.settings')
 django.setup()
 
-from pharmacy.models import Category, Medicine
+from pharmacy.models import Category, Medicine, Pharmacy
+from django.contrib.auth.models import User
 
 def import_medicines(file_path):
+    # Create a Default Pharmacy for initial data
+    admin_user = User.objects.filter(is_superuser=True).first()
+    if not admin_user:
+        admin_user = User.objects.create_superuser('admin_market', 'admin@market.com', 'admin123')
+
+    default_pharmacy, _ = Pharmacy.objects.get_or_create(
+        user=admin_user,
+        defaults={
+            'name': 'PharmaCare Central Warehouse',
+            'license_number': 'LIC-CENTRAL-001',
+            'address': 'PharmaCare HQ, Bangalore',
+            'contact_email': 'warehouse@pharmacare.com',
+            'contact_phone': '080-1234-5678',
+            'is_verified': True
+        }
+    )
+
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
         return
@@ -27,6 +45,7 @@ def import_medicines(file_path):
                 medicine, created = Medicine.objects.update_or_create(
                     name=row['name'].strip(),
                     defaults={
+                        'pharmacy': default_pharmacy,
                         'company': row['company'].strip(),
                         'category': category,
                         'price': row['price'],

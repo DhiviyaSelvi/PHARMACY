@@ -2,6 +2,24 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class Pharmacy(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='pharmacy_profile')
+    name = models.CharField(max_length=200)
+    license_number = models.CharField(max_length=100)
+    address = models.TextField()
+    contact_email = models.EmailField()
+    contact_phone = models.CharField(max_length=20)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Pharmacies"
+
+
 class Category(models.Model):
 
     name = models.CharField(max_length=100)
@@ -16,6 +34,9 @@ class Category(models.Model):
 
 
 class Medicine(models.Model):
+    pharmacy = models.ForeignKey(
+        Pharmacy, on_delete=models.CASCADE, related_name='medicines', null=True
+    )
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name='medicines'
     )
@@ -110,6 +131,8 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.SET_NULL, null=True)
 
     quantity = models.IntegerField()
 

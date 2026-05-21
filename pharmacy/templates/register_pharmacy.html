@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Register Pharmacy - PharmaCare{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <h1>Register as a Pharmacy</h1>
+    <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Join our network and start selling medicines online.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Pharmacy Name</label>
+            <input type="text" name="name" required style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Drug License Number</label>
+            <input type="text" name="license_number" required style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Full Address</label>
+            <textarea name="address" required style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Contact Email</label>
+                <input type="email" name="email" required style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Contact Phone</label>
+                <input type="text" name="phone" required style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+            </div>
+        </div>
+        <button type="submit" style="width: 100%; padding: 1rem; background: var(--accent); color: white; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; margin-top: 1rem;">Submit Application</button>
+    </form>
+</div>
+{% endblock %}

@@ -29,6 +29,7 @@
             <img src="{{ medicine.image }}" alt="{{ medicine.name }}">
             <h3>{{ medicine.name }}</h3>
             <p>{{ medicine.company }}</p>
+            <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 1rem;">Sold by: {{ medicine.pharmacy.name }}</p>
             <h4>₹ {{ medicine.price }}</h4>
             <a href="{% url 'add_to_cart' medicine.id %}">
                 <button>Add to Cart</button>

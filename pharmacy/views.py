@@ -2,6 +2,7 @@ import razorpay
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, F
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -27,14 +28,56 @@ def home(request):
 
     if query:
         medicines = medicines.filter(
-            models.Q(name__icontains=query) |
-            models.Q(company__icontains=query) |
-            models.Q(description__icontains=query)
+            Q(name__icontains=query) |
+            Q(company__icontains=query) |
+            Q(description__icontains=query)
         )
 
     return render(request, 'home.html', {
         'medicines': medicines,
         'categories': categories
+    })
+
+
+@login_required(login_url='/login/')
+def register_pharmacy(request):
+    if hasattr(request.user, 'pharmacy_profile'):
+        return redirect('pharmacy_dashboard')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        license_number = request.POST.get('license_number')
+        address = request.POST.get('address')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+
+        Pharmacy.objects.create(
+            user=request.user,
+            name=name,
+            license_number=license_number,
+            address=address,
+            contact_email=email,
+            contact_phone=phone
+        )
+        messages.success(request, "Pharmacy registered! Please wait for admin verification.")
+        return redirect('pharmacy_dashboard')
+
+    return render(request, 'register_pharmacy.html')
+
+
+@login_required(login_url='/login/')
+def pharmacy_dashboard(request):
+    if not hasattr(request.user, 'pharmacy_profile'):
+        return redirect('register_pharmacy')
+
+    pharmacy = request.user.pharmacy_profile
+    medicines = Medicine.objects.filter(pharmacy=pharmacy)
+    orders = OrderItem.objects.filter(pharmacy=pharmacy).select_related('order').order_by('-order__created_at')
+
+    return render(request, 'pharmacy_dashboard.html', {
+        'pharmacy': pharmacy,
+        'medicines': medicines,
+        'orders': orders
     })
 
 
@@ -210,6 +253,9 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 
+from django.views.decorators.http import require_POST
+
+@require_POST
 def logout_view(request):
 
     logout(request)
@@ -243,7 +289,6 @@ def checkout(request):
 
         if form.is_valid():
             from django.db import transaction
-            from django.db.models import F
 
             try:
                 with transaction.atomic():
@@ -268,6 +313,7 @@ def checkout(request):
                         OrderItem.objects.create(
                             order=order,
                             medicine=medicine,
+                            pharmacy=medicine.pharmacy,
                             quantity=item.quantity,
                             price=medicine.price
                         )
