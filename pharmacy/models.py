@@ -87,6 +87,7 @@ class Order(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=100)
     pincode = models.CharField(max_length=10)
+    prescription = models.ImageField(upload_to='prescriptions/', blank=True, null=True)
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)

@@ -14,5 +14,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('signup/', views.signup_view, name='signup'),
     path('logout/', views.logout_view, name='logout'),
+    path('about/', views.about_view, name='about'),
+    path('contact/', views.contact_view, name='contact'),
+    path('orders/', views.order_list, name='order_list'),
+    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     path('payment/callback/', views.payment_callback, name='payment_callback'),
 ]

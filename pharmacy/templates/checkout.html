@@ -46,7 +46,7 @@
 
         <!-- Right Column: Shipping Form -->
         <div class="checkout-form-container">
-            <form method="POST" class="styled-form" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow);">
+            <form method="POST" enctype="multipart/form-data" class="styled-form" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow);">
                 {% csrf_token %}
                 <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #334155;">Shipping Details</h2>
 
@@ -74,6 +74,12 @@
                         {{ form.pincode.label_tag }}
                         {{ form.pincode }}
                     </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.prescription.label_tag }}
+                    {{ form.prescription }}
+                    <small style="color: var(--danger); font-weight: 600;">* Required for schedule H/X medicines.</small>
                 </div>
 
                 <div class="form-group">
