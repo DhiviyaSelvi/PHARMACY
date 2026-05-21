@@ -1,28 +1,15 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block title %}Order Placed - PharmaCare{% endblock %}
 
-<head>
+{% block content %}
+<div style="max-width: 600px; margin: 8rem auto; text-align: center; padding: 2rem;">
+    <div style="font-size: 5rem; margin-bottom: 2rem;">🎉</div>
+    <h1 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 1rem;">Order Placed Successfully!</h1>
+    <p style="font-size: 1.125rem; color: var(--text-muted); margin-bottom: 3rem;">Your medicines will be delivered soon. You can track your order status in the "My Orders" section.</p>
 
-    <title>Order Success</title>
-
-</head>
-
-<body style="font-family:Arial;text-align:center;padding-top:100px;">
-
-    <h1>🎉 Order Placed Successfully!</h1>
-
-    <p>Your medicines will be delivered soon.</p>
-
-    <a href="/">
-
-        <button>
-
-            Back to Home
-
-        </button>
-
-    </a>
-
-</body>
-
-</html>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="{% url 'order_list' %}" style="padding: 1rem 2rem; background: var(--primary); color: white; text-decoration: none; border-radius: 0.75rem; font-weight: 700;">View Order History</a>
+        <a href="{% url 'home' %}" style="padding: 1rem 2rem; background: #f1f5f9; color: var(--text-main); text-decoration: none; border-radius: 0.75rem; font-weight: 700;">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

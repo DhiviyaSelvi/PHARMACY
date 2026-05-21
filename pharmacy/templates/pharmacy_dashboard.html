@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Pharmacy Dashboard - PharmaCare{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 3rem auto; padding: 0 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow);">
+        <div>
+            <h1 style="color: var(--secondary);">{{ pharmacy.name }}</h1>
+            <p style="color: var(--text-muted);">License: {{ pharmacy.license_number }} |
+                {% if pharmacy.is_verified %}
+                    <span style="color: var(--accent); font-weight: 700;">✓ Verified Seller</span>
+                {% else %}
+                    <span style="color: var(--danger); font-weight: 700;">⚠ Pending Verification</span>
+                {% endif %}
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Owned by {{ pharmacy.user.username }}</p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Orders Section -->
+        <div>
+            <h2 style="margin-bottom: 1.5rem;">Recent Sales</h2>
+            <div style="background: white; border-radius: 1rem; box-shadow: var(--shadow); overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th style="padding: 1rem;">Order ID</th>
+                            <th style="padding: 1rem;">Medicine</th>
+                            <th style="padding: 1rem;">Qty</th>
+                            <th style="padding: 1rem;">Status</th>
+                            <th style="padding: 1rem;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in orders %}
+                        <tr style="border-top: 1px solid #f1f5f9;">
+                            <td style="padding: 1rem;">#{{ item.order.id }}</td>
+                            <td style="padding: 1rem;">{{ item.medicine.name }}</td>
+                            <td style="padding: 1rem;">{{ item.quantity }}</td>
+                            <td style="padding: 1rem;"><span style="font-size: 0.8rem; padding: 0.25rem 0.5rem; border-radius: 9999px; background: #e0f2fe;">{{ item.order.get_status_display }}</span></td>
+                            <td style="padding: 1rem; font-weight: 600;">₹ {{ item.price }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No sales yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Inventory Summary -->
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0;">Inventory</h2>
+                <button style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;">+ Add New</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for med in medicines %}
+                <div style="background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="font-weight: 600; margin: 0;">{{ med.name }}</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Stock: {{ med.stock }} | ₹ {{ med.price }}</p>
+                    </div>
+                    <span style="color: var(--primary); cursor: pointer;">✎</span>
+                </div>
+                {% empty %}
+                <p style="color: var(--text-muted);">No medicines listed yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
