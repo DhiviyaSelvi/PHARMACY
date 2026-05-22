@@ -23,3 +23,21 @@ class Delivery(models.Model):
     # Live tracking
     current_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     current_lon = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        old_status = None
+        if not is_new:
+            old_status = Delivery.objects.get(pk=self.pk).status
+
+        super().save(*args, **kwargs)
+
+        # Trigger Notifications on Status Change
+        from notifications.tasks import send_whatsapp_task
+        if not is_new and self.status != old_status:
+            user = self.order.user
+            if user.phone_number:
+                if self.status == Delivery.Status.PICKED_UP:
+                    send_whatsapp_task.delay(user.phone_number, f"Order #{self.order.id} has been picked up and is out for delivery!")
+                elif self.status == Delivery.Status.DELIVERED:
+                    send_whatsapp_task.delay(user.phone_number, f"Order #{self.order.id} has been successfully delivered. Enjoy your health!")

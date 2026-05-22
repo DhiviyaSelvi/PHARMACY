@@ -108,6 +108,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 RAZOR_KEY_ID = config('RAZOR_KEY_ID', default='')
 RAZOR_KEY_SECRET = config('RAZOR_KEY_SECRET', default='')
 
+# Twilio Settings
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='')
+TWILIO_WHATSAPP_NUMBER = config('TWILIO_WHATSAPP_NUMBER', default='whatsapp:+14155238886')
+
+# SendGrid Settings
+SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
+DEFAULT_FROM_EMAIL = config('FROM_EMAIL', default='notifications@yourpharmacy.com')
+
 # Logging
 LOGGING = {
     'version': 1,

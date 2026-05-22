@@ -138,13 +138,43 @@ def checkout(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = CartItem.objects.filter(cart=cart)
     if not items.exists(): return redirect('home')
+
     total = sum(item.subtotal() for item in items)
+
     if request.method == 'POST':
         from orders.services import OrderService
-        OrderService.create_order_from_cart(request.user,
+        from payments.services import RazorpayService
+
+        shipping_details = {
+            'full_name': request.POST.get('full_name'),
+            'phone': request.POST.get('phone'),
+            'delivery_address': request.POST.get('delivery_address'),
+            'city': request.POST.get('city'),
+            'pincode': request.POST.get('pincode'),
+        }
+
+        # Create orders (split by pharmacy if necessary)
+        orders = OrderService.create_order_from_cart(request.user,
             [{'inventory_id': i.inventory_item.id, 'quantity': i.quantity} for i in items],
-            request.POST.get('delivery_address')
+            shipping_details
         )
+
+        # For multi-vendor, we might create multiple orders.
+        # Here we take the first one to initiate payment or handle aggregate payment.
+        main_order = orders[0]
+
+        # If Razorpay is requested (logic simplified for refactor)
+        rp_order = RazorpayService.create_razorpay_order(main_order)
+
         items.delete()
-        return render(request, 'order_success.html')
+
+        return render(request, 'checkout.html', {
+            'total': total,
+            'razorpay_order_id': rp_order['id'],
+            'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+            'razorpay_amount': rp_order['amount'],
+            'order_id': main_order.id,
+            'callback_url': request.build_absolute_uri('/payment/callback/')
+        })
+
     return render(request, 'checkout.html', {'total': total})

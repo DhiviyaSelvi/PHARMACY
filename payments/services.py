@@ -1,6 +1,7 @@
 import razorpay
 from django.conf import settings
 from .models import Payment
+from notifications.tasks import send_sms_task
 
 class RazorpayService:
     client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
@@ -44,6 +45,12 @@ class RazorpayService:
             # Update order status
             payment.order.status = payment.order.Status.CONFIRMED
             payment.order.save()
+
+            # Send Notification: Payment Success
+            user = payment.order.user
+            if user.phone_number:
+                send_sms_task.delay(user.phone_number, f"Payment Successful for order #{payment.order.id}. Thank you!")
+
             return True
         except Exception:
             return False
