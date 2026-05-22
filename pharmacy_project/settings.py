@@ -38,18 +38,39 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pharmacy',
+
+    # Third party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'django_filters',
+    'drf_spectacular',
+    'rosetta',
+
+    # Local apps
+    'accounts',
+    'pharmacies',
+    'medicines',
+    'orders',
+    'payments',
+    'delivery',
+    'notifications',
+    'analytics',
+    'prescriptions',
+    'pharmacy', # Legacy support
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'pharmacy_project.urls'
@@ -118,6 +139,8 @@ USE_I18N = True
 USE_TZ = True
 
 
+AUTH_USER_MODEL = 'accounts.User'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
@@ -144,3 +167,40 @@ X_FRAME_OPTIONS = 'DENY'
 # Razorpay Settings
 RAZOR_KEY_ID = config('RAZOR_KEY_ID', default='')
 RAZOR_KEY_SECRET = config('RAZOR_KEY_SECRET', default='')
+
+# REST Framework Settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Localization Settings
+from django.utils.translation import gettext_lazy as _
+LANGUAGE_CODE = 'en'
+LANGUAGES = [
+    ('en', _('English')),
+    ('ta', _('Tamil')),
+]
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+# Celery & Redis
+CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/0')
+
+# Caching
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config('REDIS_URL', default='redis://localhost:6379/1'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

@@ -1,9 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Pharmacy(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='pharmacy_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pharmacy_profile')
     name = models.CharField(max_length=200)
     license_number = models.CharField(max_length=100)
     address = models.TextField()
@@ -62,7 +62,7 @@ class Medicine(models.Model):
 
 class Cart(models.Model):
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -102,7 +102,7 @@ class Order(models.Model):
         ('CANCELLED', 'Cancelled'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
     phone = models.CharField(max_length=20)
     address = models.TextField()
