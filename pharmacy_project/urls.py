@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/pharmacies/', include('pharmacies.urls')),
     path('api/medicines/', include('medicines.urls')),
     path('api/payments/', include('payments.urls')),
+    path('api/delivery/', include('delivery.urls')),
 
     # Rosetta (Translation management)
     path('rosetta/', include('rosetta.urls')),
