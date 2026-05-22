@@ -1,21 +1,7 @@
 from django import forms
-
-from .models import Order
-
+from orders.models import Order
 
 class CheckoutForm(forms.ModelForm):
-
     class Meta:
-
         model = Order
-
-        fields = [
-            'full_name',
-            'phone',
-            'address',
-            'city',
-            'pincode',
-            'prescription',
-            'payment_method',
-            'transaction_id'
-        ]
+        fields = ['delivery_address']

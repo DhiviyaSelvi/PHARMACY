@@ -1,63 +1,72 @@
-import csv
 import os
 import django
-import sys
 
-# Add the current directory to sys.path to ensure we can import settings correctly
-sys.path.append(os.getcwd())
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pharmacy_project.settings')
+# Set up Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pharmacy_project.settings.development')
 django.setup()
 
-from pharmacy.models import Category, Medicine, Pharmacy
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from medicines.models import Medicine, Category, Inventory
+from pharmacies.models import Pharmacy
 
-def import_medicines(file_path):
-    # Create a Default Pharmacy for initial data
-    admin_user = User.objects.filter(is_superuser=True).first()
-    if not admin_user:
-        admin_user = User.objects.create_superuser('admin_market', 'admin@market.com', 'admin123')
+User = get_user_model()
 
-    default_pharmacy, _ = Pharmacy.objects.get_or_create(
-        user=admin_user,
+def import_data():
+    # 1. Create a Pharmacist User
+    owner, created = User.objects.get_or_create(
+        username='admin_pharmacy',
+        defaults={'role': User.Role.PHARMACIST}
+    )
+    if created:
+        owner.set_password('admin123')
+        owner.save()
+
+    # 2. Create a Pharmacy
+    pharmacy, _ = Pharmacy.objects.get_or_create(
+        owner=owner,
+        name='Apollo Pharmacy - Chennai',
+        slug='apollo-chennai',
         defaults={
-            'name': 'PharmaCare Central Warehouse',
-            'license_number': 'LIC-CENTRAL-001',
-            'address': 'PharmaCare HQ, Bangalore',
-            'contact_email': 'warehouse@pharmacare.com',
-            'contact_phone': '080-1234-5678',
+            'license_number': 'TN-12345',
+            'address': 'Anna Salai, Chennai',
+            'district': 'Chennai',
+            'contact_number': '9876543210',
             'is_verified': True
         }
     )
 
-    if not os.path.exists(file_path):
-        print(f"File not found: {file_path}")
-        return
+    # 3. Create Categories
+    fever, _ = Category.objects.get_or_create(name='Fever', slug='fever')
+    antibiotics, _ = Category.objects.get_or_create(name='Antibiotics', slug='antibiotics')
 
-    count = 0
-    with open(file_path, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            try:
-                category_name = row['category'].strip()
-                category, _ = Category.objects.get_or_create(name=category_name)
+    # 4. Create Medicines and Inventory
+    medicines_data = [
+        {'name': 'Paracetamol 500mg', 'brand': 'GSK', 'price': 15.50, 'category': fever},
+        {'name': 'Amoxicillin 250mg', 'brand': 'Cipla', 'price': 45.00, 'category': antibiotics},
+    ]
 
-                medicine, created = Medicine.objects.update_or_create(
-                    name=row['name'].strip(),
-                    defaults={
-                        'pharmacy': default_pharmacy,
-                        'company': row['company'].strip(),
-                        'category': category,
-                        'price': row['price'],
-                        'stock': row['stock'],
-                        'image': row['image'].strip()
-                    }
-                )
-                count += 1
-            except Exception as e:
-                print(f"Error importing row {row}: {e}")
+    for data in medicines_data:
+        medicine, _ = Medicine.objects.get_or_create(
+            name=data['name'],
+            slug=data['name'].lower().replace(' ', '-'),
+            defaults={
+                'brand': data['brand'],
+                'category': data['category'],
+                'description': f"High quality {data['name']}"
+            }
+        )
 
-    print(f"Import complete! {count} medicines processed.")
+        Inventory.objects.get_or_create(
+            pharmacy=pharmacy,
+            medicine=medicine,
+            defaults={
+                'price': data['price'],
+                'stock': 100,
+                'is_available': True
+            }
+        )
+
+    print("Data imported successfully to modular models.")
 
 if __name__ == "__main__":
-    import_medicines('medicines.csv')
+    import_data()
