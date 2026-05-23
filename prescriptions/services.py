@@ -1,10 +1,23 @@
 from django.db import transaction
 import random
 import time
+from PIL import Image
+import pytesseract
 from .models import Prescription, PrescriptionAuditLog
 from notifications.tasks import send_whatsapp_task
 
 class OCRService:
+    @staticmethod
+    def extract_text(image_path):
+        """
+        Uses Tesseract OCR to extract text from the prescription image.
+        """
+        try:
+            text = pytesseract.image_to_string(Image.open(image_path))
+            return text
+        except Exception:
+            return "OCR failed to process image."
+
     @staticmethod
     def extract_medicines_mock(image_url):
         """
