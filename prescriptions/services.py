@@ -1,28 +1,48 @@
-import random
-import time
+from django.db import transaction
+from .models import Prescription, PrescriptionAuditLog
+from notifications.tasks import send_whatsapp_task
 
-class PrescriptionOCRService:
+class PrescriptionService:
     @staticmethod
-    def extract_medicines(image_path):
+    @transaction.atomic
+    def verify_prescription(prescription_id, pharmacist, status, notes=""):
         """
-        Mock OCR service that simulates extracting medicine names from an image.
-        In production, this would use Google Vision API or Tesseract.
+        Approves or Rejects a prescription.
         """
-        # Simulate processing time
-        time.sleep(1)
+        if pharmacist.role != 'PHARMACIST':
+            raise PermissionError("Only pharmacists can verify prescriptions.")
 
-        # Mock extracted data
-        mock_results = [
-            {"name": "Paracetamol 500mg", "dosage": "1-0-1", "duration": "5 days"},
-            {"name": "Amoxicillin 250mg", "dosage": "1-1-1", "duration": "7 days"},
-        ]
+        prescription = Prescription.objects.get(id=prescription_id)
+        old_status = prescription.status
 
-        return mock_results
+        prescription.status = status
+        prescription.pharmacist_notes = notes
+        prescription.verified_by = pharmacist
+        prescription.save()
+
+        # Log the action
+        PrescriptionAuditLog.objects.create(
+            prescription=prescription,
+            action=f"STATUS_CHANGE: {old_status} -> {status}",
+            performed_by=pharmacist,
+            notes=notes
+        )
+
+        # Notify User
+        user = prescription.user
+        if user.phone_number:
+            msg = f"Your prescription verification is {status}. "
+            if status == Prescription.Status.APPROVED:
+                msg += "You can now proceed with your order for restricted medicines."
+            else:
+                msg += f"Reason: {notes}"
+            send_whatsapp_task.delay(user.phone_number, msg)
+
+        return prescription
 
     @staticmethod
-    def validate_prescription(image_path):
-        """
-        Simulates AI validation of whether the image is a valid medical prescription.
-        """
-        # 90% chance to be valid in this mock
-        return random.random() < 0.9
+    def link_to_order(prescription, order):
+        # This can be used to ensure an order is backed by a valid prescription
+        order.prescription_verified = True
+        order.associated_prescription = prescription
+        order.save()
