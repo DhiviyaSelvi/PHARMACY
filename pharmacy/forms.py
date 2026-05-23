@@ -10,7 +10,8 @@ class CheckoutForm(forms.ModelForm):
         ('RAZORPAY', 'Razorpay'),
     ]
     payment_method = forms.ChoiceField(choices=PAYMENT_METHODS, widget=forms.Select(attrs={'class': 'form-control'}))
+    prescription = forms.ImageField(required=False)
 
     class Meta:
         model = Order
-        fields = ['full_name', 'phone', 'delivery_address', 'city', 'pincode', 'transaction_id']
+        fields = ['full_name', 'phone', 'delivery_address', 'city', 'pincode', 'transaction_id', 'prescription']

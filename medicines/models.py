@@ -35,10 +35,12 @@ class Medicine(models.Model):
 
 class Inventory(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, related_name='inventory')
+    warehouse = models.ForeignKey('pharmacies.Warehouse', on_delete=models.SET_NULL, null=True, blank=True, related_name='stock')
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, related_name='pharmacy_stock')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     stock = models.PositiveIntegerField(default=0)
+    low_stock_threshold = models.PositiveIntegerField(default=10)
 
     is_available = models.BooleanField(default=True)
 

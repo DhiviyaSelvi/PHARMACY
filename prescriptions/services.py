@@ -1,6 +1,17 @@
 from django.db import transaction
+import random
+import time
 from .models import Prescription, PrescriptionAuditLog
 from notifications.tasks import send_whatsapp_task
+
+class OCRService:
+    @staticmethod
+    def extract_medicines_mock(image_url):
+        """
+        Mock OCR service extracting medicine names.
+        """
+        time.sleep(1)
+        return ["Paracetamol 500mg", "Amoxicillin 250mg"]
 
 class PrescriptionService:
     @staticmethod

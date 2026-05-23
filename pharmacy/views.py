@@ -182,8 +182,10 @@ def checkout(request):
     if not items.exists(): return redirect('home')
 
     total = sum(item.subtotal() for item in items)
+    form = CheckoutForm()
 
     if request.method == 'POST':
+        form = CheckoutForm(request.POST, request.FILES)
         from orders.services import OrderService
         from payments.services import RazorpayService
 
@@ -219,4 +221,8 @@ def checkout(request):
             'callback_url': request.build_absolute_uri('/payment/callback/')
         })
 
-    return render(request, 'checkout.html', {'total': total})
+    return render(request, 'checkout.html', {
+        'total': total,
+        'form': form,
+        'items': items
+    })
