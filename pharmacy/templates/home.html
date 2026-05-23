@@ -21,17 +21,34 @@
     </div>
 </section>
 
+<section class="hyperlocal-search" style="background: #f8fafc; padding: 2rem; border-radius: 1rem; margin: 2rem auto; max-width: 600px; text-align: center; box-shadow: var(--shadow);">
+    <h3 style="margin-bottom: 1rem; color: #1e293b;">📍 Shop Near You</h3>
+    <form method="GET" action="{% url 'home' %}" style="display: flex; gap: 0.5rem; justify-content: center;">
+        <input type="text" name="pincode" placeholder="Enter Pincode (e.g. 641002)" value="{{ user_pincode|default:'' }}"
+               style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; flex: 1;">
+        <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">
+            Update
+        </button>
+    </form>
+    {% if user_pincode %}
+    <p style="font-size: 0.9rem; color: #64748b; margin-top: 1rem;">Showing nearest results for <strong>{{ user_pincode }}</strong></p>
+    {% endif %}
+</section>
+
 <section class="medicines">
     <h2>Medicines</h2>
     <div class="medicine-container">
-        {% for medicine in medicines %}
+        {% for item in medicines %}
         <div class="medicine-card">
-            <img src="{{ medicine.image }}" alt="{{ medicine.name }}">
-            <h3>{{ medicine.name }}</h3>
-            <p>{{ medicine.company }}</p>
-            <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 1rem;">Sold by: {{ medicine.pharmacy.name }}</p>
-            <h4>₹ {{ medicine.price }}</h4>
-            <a href="{% url 'add_to_cart' medicine.id %}">
+            <img src="{{ item.medicine.image.url|default:'' }}" alt="{{ item.medicine.name }}">
+            <h3>{{ item.medicine.name }}</h3>
+            <p>{{ item.medicine.brand }}</p>
+            <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 0.5rem;">Sold by: <strong>{{ item.pharmacy.name }}</strong></p>
+            {% if item.distance_km is not None %}
+            <p style="font-size: 0.75rem; color: #10b981; margin-bottom: 1rem;">📍 {{ item.distance_km }} km away</p>
+            {% endif %}
+            <h4>₹ {{ item.price }}</h4>
+            <a href="{% url 'add_to_cart' item.id %}">
                 <button>Add to Cart</button>
             </a>
         </div>

@@ -19,14 +19,56 @@ from .forms import CheckoutForm
 User = get_user_model()
 
 def home(request):
+    from pharmacies.services import GeoLocationService
+    from pharmacies.utils_geo import MockGeoCoder
+
     categories = Category.objects.all()
     query = request.GET.get('q')
-    medicines = Inventory.objects.filter(stock__gt=0).select_related('medicine')
+    user_pincode = request.GET.get('pincode')
+
+    # Base queryset
+    inventory_qs = Inventory.objects.filter(stock__gt=0).select_related('medicine', 'pharmacy')
+
+    # Apply Hyperlocal Ranking
+    if user_pincode:
+        coords = MockGeoCoder.get_coordinates(user_pincode)
+        if coords:
+            lat, lon = coords
+            nearby_pharms = GeoLocationService.get_nearby_pharmacies(lat, lon, radius_km=15)
+            pharmacy_ids = [p.id for p in nearby_pharms]
+
+            # Sort inventory by proximity of the pharmacy
+            pharmacy_distance_map = {p.id: p.distance for p in nearby_pharms}
+
+            # Sort inventory by proximity of the pharmacy
+            sorted_inventory = []
+            for pharm in nearby_pharms:
+                matches = inventory_qs.filter(pharmacy_id=pharm.id)
+                for item in matches:
+                    item.distance_km = pharm.distance
+                    sorted_inventory.append(item)
+
+            # Add remaining
+            remaining = inventory_qs.exclude(pharmacy_id__in=pharmacy_ids)
+            inventory_qs = sorted_inventory + list(remaining)
+        else:
+            # Fallback to simple filtering
+            inventory_qs = inventory_qs.filter(pharmacy__pincode=user_pincode)
+
     if query:
-        medicines = medicines.filter(
-            Q(medicine__name__icontains=query) | Q(medicine__brand__icontains=query)
-        )
-    return render(request, 'home.html', {'medicines': medicines, 'categories': categories})
+        # If inventory_qs is a list (from sorting), filter manually or re-query
+        if isinstance(inventory_qs, list):
+            inventory_qs = [i for i in inventory_qs if query.lower() in i.medicine.name.lower()]
+        else:
+            inventory_qs = inventory_qs.filter(
+                Q(medicine__name__icontains=query) | Q(medicine__brand__icontains=query)
+            )
+
+    return render(request, 'home.html', {
+        'medicines': inventory_qs,
+        'categories': categories,
+        'user_pincode': user_pincode
+    })
 
 @login_required(login_url='/login/')
 def register_pharmacy(request):
